@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MDIA — Guide Prompts Claude</title>
+<style>
+/* Toutes les polices sont système — aucune dépendance externe */
+:root {
+  --ff: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  --ff-mono: 'Consolas', 'Courier New', monospace;
+  --cream: #FAF8F4;
+  --cream2: #F0EDE6;
+  --ink: #1A1040;
+  --ink2: #3D3464;
+  --ink3: #6B6490;
+  --teal: #0F6E56;
+  --teal-l: #E1F5EE;
+  --teal-m: #1D9E75;
+  --amber: #B87B0A;
+  --amber-l: #FEF3DC;
+  --blue: #1A4F8A;
+  --blue-l: #E6F1FB;
+  --red-l: #FCEBEB;
+  --red: #A32D2D;
+  --purple-l: #EEEDFE;
+  --purple: #3C3489;
+  --border: rgba(26,16,64,0.1);
+  --border2: rgba(26,16,64,0.2);
+  --r: 10px;
+  --rl: 16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ff);background:var(--cream);color:var(--ink);min-height:100vh;line-height:1.6}
+
+/* ── LOGIN ── */
+#ls{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--ink);position:relative;overflow:hidden}
+#ls::before{content:'';position:absolute;top:-30%;right:-10%;width:500px;height:500px;border-radius:50%;background:rgba(15,110,86,0.1)}
+#ls::after{content:'';position:absolute;bottom:-20%;left:-5%;width:350px;height:350px;border-radius:50%;background:rgba(200,131,10,0.07)}
+.lc{background:var(--cream);border-radius:var(--rl);padding:3rem 2.5rem;width:100%;max-width:420px;position:relative;z-index:1}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:2rem}
+.lm{width:44px;height:44px;background:var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:17px;letter-spacing:0.02em;flex-shrink:0}
+.lt{font-weight:700;font-size:20px;letter-spacing:-0.02em}
+.ls2{font-size:11px;font-weight:400;color:var(--ink3);letter-spacing:0.05em;text-transform:uppercase}
+h1.lh{font-size:22px;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.5rem}
+.ld{font-size:14px;color:var(--ink3);margin-bottom:2rem;line-height:1.5}
+.fl{font-size:12px;font-weight:600;color:var(--ink2);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;display:block}
+.ci{width:100%;padding:12px 16px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--ff-mono);font-size:16px;font-weight:600;color:var(--ink);background:#fff;letter-spacing:0.1em;outline:none;transition:border-color 0.2s}
+.ci:focus{border-color:var(--teal)}
+.ci.err{border-color:var(--red);background:var(--red-l)}
+.em{font-size:12px;color:var(--red);margin-top:6px;display:none}
+.lb{width:100%;margin-top:1.25rem;padding:13px 24px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--ff);font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s,transform 0.1s}
+.lb:hover{background:#0d5e49}
+.lb:active{transform:scale(0.98)}
+.lf{margin-top:1.5rem;font-size:12px;color:var(--ink3);text-align:center;line-height:1.6}
+
+/* ── APP ── */
+#app{display:none}
+.hdr{background:var(--ink);color:#fff;padding:0.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hlm{width:34px;height:34px;background:var(--teal-m);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.ht{font-size:15px;font-weight:700;letter-spacing:-0.01em;color:#fff}
+.hs{font-size:11px;color:rgba(255,255,255,0.5);font-weight:400}
+.hbadge{font-size:11px;font-weight:600;background:rgba(29,158,117,0.2);color:#5DCAA5;border:0.5px solid rgba(29,158,117,0.3);border-radius:20px;padding:4px 12px}
+.hlogo{display:flex;align-items:center;gap:10px}
+.hbtns{display:flex;align-items:center;gap:10px}
+.qbtn{background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;font-family:var(--ff)}
+.qbtn:hover{background:rgba(255,255,255,0.1);color:#fff}
+
+/* ── HERO ── */
+.hero{background:var(--ink2);color:#fff;padding:2.5rem 1.5rem;text-align:center}
+.htag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#5DCAA5;background:rgba(29,158,117,0.15);border-radius:20px;padding:4px 14px;margin-bottom:1rem}
+.htitle{font-size:clamp(26px,5vw,40px);font-weight:700;letter-spacing:-0.03em;line-height:1.15;margin-bottom:0.875rem;color:#fff}
+.htitle span{color:#5DCAA5}
+.hdesc{font-size:14px;color:rgba(255,255,255,0.65);max-width:560px;margin:0 auto;line-height:1.7}
+
+/* ── MAIN ── */
+.main{max-width:900px;margin:0 auto;padding:2rem 1.25rem}
+
+/* ── STEPS NAV ── */
+.snav{display:flex;gap:6px;margin-bottom:2rem;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.snav::-webkit-scrollbar{display:none}
+.sp{flex-shrink:0;display:flex;align-items:center;gap:7px;padding:7px 15px;border-radius:30px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink3);transition:all 0.2s;white-space:nowrap;font-family:var(--ff)}
+.sp:hover{border-color:var(--teal-m);color:var(--teal)}
+.sp.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.sn{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.sp:not(.active) .sn{background:var(--cream2);color:var(--ink2)}
+
+/* ── PANELS ── */
+.panel{display:none;animation:fi 0.28s ease}
+.panel.vis{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CARDS ── */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin-bottom:1rem}
+.ct{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:0.5rem;letter-spacing:-0.01em}
+.cd{font-size:14px;color:var(--ink3);line-height:1.7}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}
+.four{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.875rem}
+@media(max-width:580px){.two,.four{grid-template-columns:1fr}}
+@media(min-width:700px){.four{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* ── PROMPT BOX ── */
+.plabel{font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:7px;display:block}
+.pb{background:var(--cream);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;font-size:13.5px;color:var(--ink);line-height:1.65;margin-bottom:0.75rem}
+.pr{background:var(--teal-l);color:var(--teal);border-radius:4px;padding:2px 6px;font-weight:600}
+.pt{background:var(--blue-l);color:var(--blue);border-radius:4px;padding:2px 6px;font-weight:600}
+.pf{background:var(--amber-l);color:var(--amber);border-radius:4px;padding:2px 6px;font-weight:600}
+.pe{background:var(--purple-l);color:var(--purple);border-radius:4px;padding:2px 6px;font-weight:600}
+.leg{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3)}
+.ld2{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* ── BADGES ── */
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:10px;letter-spacing:0.02em}
+.bg{background:var(--teal-l);color:var(--teal)}
+.bb{background:var(--red-l);color:var(--red)}
+.bt{background:var(--purple-l);color:var(--purple)}
+.bi{background:var(--blue-l);color:var(--blue)}
+
+/* ── INGREDIENT CARDS ── */
+.ingr{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:1.25rem}
+.in{width:32px;height:32px;border-radius:8px;color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.it{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.id{font-size:12.5px;color:var(--ink3);line-height:1.5}
+
+/* ── PRACTICE BTNS ── */
+.pbtn{display:block;width:100%;text-align:left;padding:11px 15px;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:var(--r);font-family:var(--ff);font-size:13.5px;color:var(--ink);cursor:pointer;transition:all 0.18s;line-height:1.4}
+.pbtn:hover{background:var(--cream2);border-color:var(--teal-m);color:var(--teal);transform:translateX(2px)}
+.pbtn::after{content:' ↗';color:var(--teal);font-weight:600}
+
+/* ── COPY FEEDBACK ── */
+.cfb{display:none;background:var(--teal-l);border:1px solid rgba(15,110,86,0.25);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--teal);margin-top:0.5rem;font-weight:500}
+
+/* ── RESOURCE CARDS ── */
+.rc{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem;display:flex;align-items:flex-start;gap:1rem;margin-bottom:0.75rem;text-decoration:none;color:inherit;transition:all 0.2s;cursor:pointer}
+.rc:hover{border-color:var(--teal-m);transform:translateX(3px)}
+.ri{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.rtt{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.rtd{font-size:12px;color:var(--ink3);line-height:1.5}
+.rl{font-size:11px;color:var(--teal);font-family:var(--ff-mono);margin-top:4px;display:block}
+
+/* ── INFO BOX ── */
+.ib{background:var(--teal-l);border:1px solid rgba(15,110,86,0.2);border-radius:var(--r);padding:1rem 1.25rem;font-size:13px;color:var(--teal);line-height:1.6;margin-bottom:1rem}
+
+/* ── SECTION HEADING ── */
+.sh{font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.sh::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── COMPARE ── */
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:1rem}
+@media(max-width:580px){.cmp{grid-template-columns:1fr}}
+
+/* ── DARK CARD ── */
+.dcard{background:var(--ink);border-color:var(--ink)}
+.dcard .ct{color:#fff}
+.dcard .cd{color:rgba(255,255,255,0.65)}
+
+/* ── FOOTER ── */
+.footer{background:var(--ink);color:rgba(255,255,255,0.45);text-align:center;padding:2rem 1.5rem;font-size:12px;line-height:1.8;margin-top:3rem}
+.footer a{color:#5DCAA5;text-decoration:none}
+
+/* ── OFFLINE NOTICE ── */
+.off-notice{background:var(--amber-l);border:1px solid rgba(200,131,10,0.25);border-radius:var(--r);padding:0.75rem 1.25rem;font-size:12px;color:var(--amber);line-height:1.5;margin-bottom:1rem;display:flex;gap:8px;align-items:flex-start}
+
+hr.div{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN ══════════════════ -->
+<div id="ls" style="display:none">
+  <div class="lc">
+    <div class="logo">
+      <div class="lm">MD</div>
+      <div>
+        <div class="lt">MDIA</div>
+        <span class="ls2">Guide IA Collaborateurs</span>
+      </div>
+    </div>
+    <h1 class="lh">Accès réservé</h1>
+    <p class="ld">Entrez le code d'accès transmis par votre référent IA pour accéder au guide de prompting Claude.</p>
+    <label class="fl" for="cf">Code d'accès</label>
+    <input class="ci" id="cf" type="password" placeholder="••••••••" autocomplete="off" maxlength="20">
+    <div class="em" id="em">Code incorrect. Contactez votre référent IA.</div>
+    <button class="lb" onclick="login()">Accéder au guide</button>
+    <div class="lf">Ce guide est réservé aux collaborateurs.<br>Développé par MDIA · Anthropic Claude</div>
+  </div>
+</div>
+
+<!-- ══════════════════ APP ══════════════════ -->
+<div id="app" style="display:block">
+
+<header class="hdr">
+  <div class="hlogo">
+    <div class="hlm">MD</div>
+    <div>
+      <div class="ht">MDIA · Guide Prompts Claude</div>
+      <div class="hs">Formation Collaborateurs · 2025</div>
+    </div>
+  </div>
+  <div class="hbtns">
+    <div class="hbadge" id="mode-badge">Hors-ligne</div>
+    <button class="qbtn" onclick="logout()">Quitter</button>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="htag">Tutoriel interactif</div>
+  <h1 class="htitle">Maîtrisez l'art<br>du <span>prompt efficace</span></h1>
+  <p class="hdesc">5 étapes progressives pour communiquer avec Claude comme un professionnel — aucun prérequis technique requis.</p>
+</div>
+
+<main class="main">
+
+<nav class="snav">
+  <button class="sp active" onclick="go(0)"><span class="sn">1</span>C'est quoi un prompt ?</button>
+  <button class="sp" onclick="go(1)"><span class="sn">2</span>La recette RTFE</button>
+  <button class="sp" onclick="go(2)"><span class="sn">3</span>Exemples comparés</button>
+  <button class="sp" onclick="go(3)"><span class="sn">4</span>Erreurs fréquentes</button>
+  <button class="sp" onclick="go(4)"><span class="sn">5</span>Pratiquer</button>
+  <button class="sp" onclick="go(5)"><span class="sn">6</span>Ressources</button>
+</nav>
+
+<!-- ── PANEL 0 ── -->
+<div id="p0" class="panel vis">
+  <div class="card">
+    <div class="ct">Un prompt, c'est votre instruction à Claude</div>
+    <p class="cd">Imaginez un collaborateur exceptionnel, disponible à toute heure, capable de rédiger, analyser, expliquer, traduire ou résumer. Plus vous lui expliquez clairement ce que vous attendez, plus sa réponse sera précise. C'est exactement ça, le prompting.</p>
+  </div>
+  <div class="sh">Comprendre la différence</div>
+  <div class="two">
+    <div class="card">
+      <span class="badge bb">Prompt vague</span>
+      <div class="pb">"Résume ce document."</div>
+      <p style="font-size:13px;color:var(--ink3)">Claude ne sait pas : pour qui ? En combien de lignes ? Quel ton ? Quel angle ?</p>
+    </div>
+    <div class="card">
+      <span class="badge bg">Prompt précis</span>
+      <div class="pb">"Résume ce document en 5 points clés pour une directrice non-technique. Sois concis et concret."</div>
+      <p style="font-size:13px;color:var(--ink3)">Claude sait exactement quoi faire, pour qui, et comment.</p>
+    </div>
+  </div>
+  <div class="ib"><strong>Bonne nouvelle :</strong> pas besoin de langage technique. Parlez à Claude comme vous parleriez à un collègue intelligent — en français, naturellement, avec du contexte.</div>
+  <div class="card">
+    <div class="ct">Pourquoi Claude en particulier ?</div>
+    <div class="four" style="margin-top:1rem">
+      <div class="ingr"><div class="it">Qualité rédactionnelle</div><div class="id">Textes naturels, bien rythmés, moins "générés" que ses concurrents.</div></div>
+      <div class="ingr"><div class="it">Précision contextuelle</div><div class="id">Retient toute la conversation et affine progressivement ses réponses.</div></div>
+      <div class="ingr"><div class="it">Éthique intégrée</div><div class="id">Principes de sécurité et de transparence développés par Anthropic.</div></div>
+      <div class="ingr"><div class="it">Multiformat</div><div class="id">Documents Word, PDF, Excel, présentations, code, tableaux — tout en un.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PANEL 1 ── -->
+<div id="p1" class="panel">
+  <div class="card">
+    <div class="ct">La méthode RTFE — 4 ingrédients, un prompt puissant</div>
+    <p class="cd" style="margin-bottom:1.25rem">Comme une recette : chaque ingrédient a son rôle. Plus vous en ajoutez, meilleur sera le résultat.</p>
+    <div class="leg">
+      <div class="li"><div class="ld2" style="background:#1D9E75"></div>Rôle</div>
+      <div class="li"><div class="ld2" style="background:#1A4F8A"></div>Tâche</div>
+      <div class="li"><div class="ld2" style="background:#B87B0A"></div>Format</div>
+      <div class="li"><div class="ld2" style="background:#534AB7"></div>Exemple</div>
+    </div>
+    <div class="pb">
+      <span class="pr">Tu es un formateur pédagogue pour enseignants du primaire.</span>&nbsp;<span class="pt">Explique le concept de fractions avec des analogies du quotidien, adaptées à des élèves de CE2.</span>&nbsp;<span class="pf">Réponds en 3 paragraphes courts, avec un titre pour chacun.</span>&nbsp;<span class="pe">Exemple de ton attendu : simple, bienveillant, sans jargon mathématique.</span>
+    </div>
+  </div>
+  <div class="sh">Détail des 4 ingrédients</div>
+  <div class="four">
+    <div class="ingr"><div class="in" style="background:var(--teal)">R</div><div class="it">Rôle</div><div class="id">"Tu es un expert en…" — attribuez un profil à Claude pour orienter son registre et son niveau de réponse.</div></div>
+    <div class="ingr"><div class="in" style="background:var(--blue)">T</div><div class="it">Tâche</div><div class="id">Ce que vous attendez : "rédige", "liste", "compare", "analyse"… Soyez précis sur l'action attendue.</div></div>
+    <div class="ingr"><div class="in" style="background:var(--amber)">F</div><div class="it">Format</div><div class="id">Tableau, liste, email formel, 5 lignes max, en langage simple… Guidez la forme du résultat.</div></div>
+    <div class="ingr"><div class="in" style="background:var(--purple)">E</div><div class="it">Exemple</div><div class="id">Facultatif mais puissant : montrez un extrait du résultat attendu. Claude s'alignera sur votre modèle.</div></div>
+  </div>
+  <div class="card" style="background:var(--cream2);margin-top:1rem">
+    <div class="ct">Conseil clé</div>
+    <p class="cd">Vous n'avez pas à tout mettre en une phrase. Écrivez sur plusieurs lignes. La clarté prime sur la concision. Claude lit tout et comprend la structure.</p>
+  </div>
+</div>
+
+<!-- ── PANEL 2 ── -->
+<div id="p2" class="panel">
+  <div class="sh">Cas concrets comparés</div>
+  <div class="card">
+    <div class="ct">Cas 1 — Email professionnel</div>
+    <div class="cmp" style="margin-top:1rem">
+      <div><span class="badge bb">Prompt faible</span><div class="pb">"Écris un email."</div></div>
+      <div><span class="badge bg">Prompt efficace</span><div class="pb">"Rédige un email pour relancer un prestataire qui n'a pas rendu son rapport prévu lundi. Ton ferme mais courtois. 3 paragraphes max. Inclus une date limite claire."</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--ink3)">Ce qui change : le destinataire, la situation, le ton, la structure et la contrainte concrète.</p>
+  </div>
+  <div class="card">
+    <div class="ct">Cas 2 — Préparation pédagogique</div>
+    <div class="cmp" style="margin-top:1rem">
+      <div><span class="badge bb">Prompt faible</span><div class="pb">"Aide-moi pour mon cours."</div></div>
+      <div><span class="badge bg">Prompt efficace</span><div class="pb">"Je suis enseignant en 6ème. Propose 3 activités de 10 min sur la Révolution française, pour élèves hétérogènes. Format : titre + objectif + 3 étapes."</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">Cas 3 — Analyse de document</div>
+    <div class="cmp" style="margin-top:1rem">
+      <div><span class="badge bb">Prompt faible</span><div class="pb">"Que penses-tu de ce texte ?"</div></div>
+      <div><span class="badge bg">Prompt efficace</span><div class="pb">"Lis ce compte-rendu et identifie : 1) décisions prises, 2) points en suspens, 3) actions à suivre avec responsable et date. Format tableau."</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">Cas 4 — Se former soi-même</div>
+    <div class="cmp" style="margin-top:1rem">
+      <div><span class="badge bb">Prompt faible</span><div class="pb">"Explique-moi l'IA."</div></div>
+      <div><span class="badge bg">Prompt efficace</span><div class="pb">"Je veux comprendre l'IA en partant de zéro. Commence par les bases en 5 phrases simples. Puis pose-moi 2 questions pour vérifier ma compréhension."</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PANEL 3 ── -->
+<div id="p3" class="panel">
+  <div class="sh">Les 4 erreurs les plus fréquentes</div>
+  <div class="card">
+    <span class="badge bb">Erreur 1 — Trop vague</span>
+    <div class="ct" style="font-size:15px">Le prompt sans contexte</div>
+    <div class="pb">"Parle-moi de l'IA dans l'éducation."</div>
+    <div class="ib"><strong>Correction :</strong> "Explique en 5 lignes les 3 usages principaux de l'IA dans l'enseignement primaire, à destination d'un parent d'élève non-technophile."</div>
+  </div>
+  <div class="card">
+    <span class="badge bb">Erreur 2 — Oublier le destinataire</span>
+    <div class="ct" style="font-size:15px">Pour qui est cette réponse ?</div>
+    <div class="pb">"Fais une présentation sur le RGPD."</div>
+    <div class="ib"><strong>Correction :</strong> Ajoutez toujours "pour [profil]". "…pour des enseignants non-juristes, vocabulaire accessible, 8 slides max."</div>
+  </div>
+  <div class="card">
+    <span class="badge bb">Erreur 3 — Ne pas itérer</span>
+    <div class="ct" style="font-size:15px">Abandonner à la première réponse</div>
+    <p class="cd" style="margin-bottom:0.75rem">Si la réponse ne convient pas, affinez dans la même conversation :</p>
+    <div class="pb">"Ta réponse est trop longue. Résume en 3 points essentiels."</div>
+    <div class="pb">"Reformule avec un ton plus chaleureux."</div>
+    <div class="pb">"Ajoute un exemple concret pour chaque point."</div>
+    <span class="badge bt">Rappel</span>
+    <p style="font-size:13px;color:var(--ink3)">Claude retient tout le contexte de la conversation. Chaque précision améliore le résultat sans repartir de zéro.</p>
+  </div>
+  <div class="card">
+    <span class="badge bb">Erreur 4 — Tout demander d'un coup</span>
+    <div class="ct" style="font-size:15px">Un prompt = une tâche principale</div>
+    <div class="two" style="margin-top:1rem">
+      <div><span class="badge bb">À éviter</span><div class="pb">"Résume ce doc, traduis-le en anglais, fais-en une présentation et propose des améliorations."</div></div>
+      <div><span class="badge bg">Préférez</span><div class="pb">4 messages distincts, chacun consacré à une seule tâche = 4 résultats de qualité.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PANEL 4 ── -->
+<div id="p4" class="panel">
+  <div class="card">
+    <div class="ct">Testez ces prompts directement sur Claude</div>
+    <p class="cd">Cliquez sur un exemple pour le copier, puis rendez-vous sur <strong>claude.ai</strong> et collez-le pour voir le résultat en conditions réelles.</p>
+  </div>
+  <div class="sh">Niveau débutant</div>
+  <div class="card">
+    <button class="pbtn" onclick="copy(this,'Tu es un pédagogue bienveillant. Explique-moi ce qu\'est l\'intelligence artificielle en 5 phrases simples, avec une analogie du quotidien. Public : adulte sans formation technique.')">Expliquer l'IA en langage simple</button>
+    <button class="pbtn" onclick="copy(this,'Rédige un email professionnel pour demander un rendez-vous à mon responsable afin de lui présenter un nouveau projet. Ton formel et enthousiaste. 3 paragraphes. Inclus l\'objet de l\'email.')">Rédiger un email de demande de RDV</button>
+    <button class="pbtn" onclick="copy(this,'Je veux comprendre le RGPD en partant de zéro. Mon contexte : je suis enseignant et je manipule des données d\'élèves. Explique-moi les 3 points les plus importants à connaître, en langage accessible, sans jargon juridique.')">Comprendre le RGPD en tant qu'enseignant</button>
+  </div>
+  <div class="sh">Niveau intermédiaire</div>
+  <div class="card">
+    <button class="pbtn" onclick="copy(this,'Je suis enseignant en 6ème. Propose-moi 3 activités pédagogiques de 15 minutes sur le thème de la citoyenneté numérique. Format pour chaque activité : titre + objectif pédagogique + déroulement en 3 étapes + matériel nécessaire.')">Créer des activités sur la citoyenneté numérique</button>
+    <button class="pbtn" onclick="copy(this,'Analyse ce prompt et dis-moi comment l\'améliorer selon la méthode RTFE (Rôle, Tâche, Format, Exemple) : \"Écris quelque chose sur le changement climatique pour mes élèves.\" Propose ensuite une version améliorée.')">Améliorer un prompt faible avec RTFE</button>
+    <button class="pbtn" onclick="copy(this,'Tu es un expert en communication interne. Rédige un message pour annoncer à mes collègues une nouvelle politique d\'usage des outils IA. Ton positif et rassurant. 3 paragraphes. Points : contexte, bénéfices attendus, prochaines étapes.')">Rédiger une communication interne sur l'IA</button>
+  </div>
+  <div class="cfb" id="cfb">Prompt copié — rendez-vous sur <strong>claude.ai</strong> et collez-le (Ctrl+V)</div>
+</div>
+
+<!-- ── PANEL 5 ── -->
+<div id="p5" class="panel">
+  <div class="sh">Formation officielle Anthropic</div>
+  <div class="rc" onclick="openUrl('https://anthropic.skilljar.com/claude-101')">
+    <div class="ri" style="background:var(--teal-l)">🎓</div>
+    <div><div class="rtt">Claude 101 — Cours officiel Anthropic</div><div class="rtd">Point de départ recommandé. Fondamentaux de Claude : structurer ses demandes, Projects, artefacts. Aucun compte développeur requis.</div><span class="rl">anthropic.skilljar.com/claude-101</span></div>
+  </div>
+  <div class="rc" onclick="openUrl('https://anthropic.skilljar.com/')">
+    <div class="ri" style="background:var(--blue-l)">📚</div>
+    <div><div class="rtt">Tous les cours Anthropic</div><div class="rtd">Catalogue complet : Claude 101, API, Claude Code, Cowork et plus. Certifiants, gratuits, accessibles à tous niveaux.</div><span class="rl">anthropic.skilljar.com</span></div>
+  </div>
+  <div class="sh">Documentation & pratique</div>
+  <div class="rc" onclick="openUrl('https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview')">
+    <div class="ri" style="background:var(--amber-l)">📖</div>
+    <div><div class="rtt">Guide officiel de prompt engineering</div><div class="rtd">Référence Anthropic pour les techniques avancées : contexte métier, exemples, instructions système. Idéal pour standardiser en équipe.</div><span class="rl">docs.claude.com · Prompt Engineering</span></div>
+  </div>
+  <div class="rc" onclick="openUrl('https://claude.ai')">
+    <div class="ri" style="background:var(--teal-l)">💬</div>
+    <div><div class="rtt">Claude.ai — Pratiquer directement</div><div class="rtd">La plateforme officielle. Créez un compte gratuit et commencez à pratiquer les prompts de ce guide immédiatement.</div><span class="rl">claude.ai</span></div>
+  </div>
+  <hr class="div">
+  <div class="card dcard">
+    <div class="ct">MDIA — Votre référent IA</div>
+    <p class="cd" style="margin-top:0.5rem">Ce guide est réservé aux collaborateurs. Pour toute question, besoin de formation complémentaire ou cas d'usage spécifique à votre métier, contactez votre référent IA interne.</p>
+  </div>
+</div>
+
+</main>
+
+<footer class="footer">
+  MDIA · Guide Prompts Claude · Formation Collaborateurs 2025<br>
+  Développé avec <a href="javascript:openUrl('https://claude.ai')">Claude (Anthropic)</a> ·
+  <a href="javascript:openUrl('https://anthropic.skilljar.com/')">Formation officielle</a> ·
+  <a href="javascript:openUrl('https://docs.claude.com')">Documentation</a>
+</footer>
+
+</div>
+
+<script>
+const CODE = 'MDIA2025';
+const SK = 'mdia_v2';
+
+function login() {
+  const v = document.getElementById('cf').value.trim().toUpperCase();
+  const i = document.getElementById('cf');
+  const e = document.getElementById('em');
+  if (v === CODE) {
+    try { sessionStorage.setItem(SK,'1'); } catch(x){}
+    document.getElementById('ls').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    i.classList.remove('err');
+    e.style.display = 'none';
+  } else {
+    i.classList.add('err');
+    e.style.display = 'block';
+    i.value = '';
+    i.focus();
+    setTimeout(() => { i.classList.remove('err'); e.style.display = 'none'; }, 3500);
+  }
+}
+
+function logout() {
+  try { sessionStorage.removeItem(SK); } catch(x){}
+  document.getElementById('ls').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('cf').value = '';
+}
+
+function go(i) {
+  document.querySelectorAll('.panel').forEach((p,j) => p.classList.toggle('vis', j===i));
+  document.querySelectorAll('.sp').forEach((b,j) => b.classList.toggle('active', j===i));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function copy(btn, txt) {
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(txt).catch(fallback);
+  } else { fallback(); }
+  const fb = document.getElementById('cfb');
+  fb.style.display = 'block';
+  setTimeout(() => fb.style.display = 'none', 4000);
+}
+
+function openUrl(url) {
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+document.getElementById('cf').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+
+/* Auto-login si session active */
+document.getElementById('ls').style.display = 'none';
+document.getElementById('app').style.display = 'block';
+
+/* Détecte si en ligne */
+if (navigator.onLine) {
+  document.getElementById('mode-badge').textContent = 'En ligne';
+  document.getElementById('mode-badge').style.cssText = 'font-size:11px;font-weight:600;background:rgba(29,158,117,0.2);color:#5DCAA5;border:0.5px solid rgba(29,158,117,0.3);border-radius:20px;padding:4px 12px';
+}
+</script>
+</body>
+</html>
